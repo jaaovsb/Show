@@ -1,0 +1,61 @@
+int x = 0;
+
+sub Segue_Linha(){
+	while(true){
+		OnFwd(OUT_AC, 50);
+		while (SensorUS(IN_1) <= 12){
+			OnRev(OUT_A, 70);
+			OnFwd(OUT_C, 70);
+   			Wait(200);
+   		}
+   		while(SensorUS(IN_3) <= 12){
+			OnRev(OUT_C, 70);
+			OnFwd(OUT_A, 70);
+        	Wait(200);
+   		}
+   	}
+}
+int Obstaculos(){
+	while(true){
+		OnFwd(OUT_AC, 30);
+		if(SensorUS(IN_4) == 3){
+			Off(OUT_AC);
+			if(SensorUS(IN_2) == 12){
+				OnRev(OUT_AC);
+				Wait(400);
+				x = 1
+				return x;
+				
+			}
+			
+		}
+	}
+}
+sub Contornar(){
+	while(true){
+		OnFwd(OUT_A, 60);
+        OnRev(OUT_C, 60);
+        Wait(850);
+        Off(OUT_AC);
+        Wait(2000);
+	}
+
+
+}
+
+
+task main(){
+	SetSensorLowspeed(IN_3); //Esquerda C
+   	SetSensorLowspeed(IN_2); //Meio
+   	SetSensorLowspeed(IN_1); //Direita A
+   	SetSensorLowspeed(IN_4); //Ultrassom
+
+   	Segue_Linha();
+   	if(SensorUS(IN_4) == 10){
+   		Obstaculos(x);
+   	}
+   	if (x = 1){
+   		Contorno();
+   	}
+
+}
