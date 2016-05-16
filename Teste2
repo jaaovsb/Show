@@ -1,0 +1,90 @@
+//sensores
+#define Ultrassom SensorUS(IN_4)
+#define Cor_esquerda SensorUS(IN_3)
+#define Cor_frente SensorUS(IN_2)
+#define Cor_direita SensorUS(IN_1)
+
+//sub segue linha
+#define vel_frente 70
+#define preto 12
+#define branco 17
+#define vel_curva 90
+//definir o tempo de espera 
+
+//sub obstaculos
+#define vel_obstaculos 30
+#define dist_obstaculo 3
+
+
+int x = 0;
+sub Segue_Linha(){
+	while(true){
+		OnFwd(OUT_AC, vel_frente);
+		while (SensorUS(IN_1) <= preto){
+			OnRev(OUT_A, vel_curva);
+			OnFwd(OUT_C, vel_curva);
+   			Wait(200); 
+   		}
+   		while(SensorUS(IN_3) <= vel_frente){
+			OnRev(OUT_C, vel_curva);
+			OnFwd(OUT_A, vel_curva);
+        	Wait(200);
+   		}
+   	}
+}
+int Obstaculos(){
+	while(true){
+		OnFwd(OUT_AC, vel_obstaculos);
+		if(SensorUS(IN_4) == dist_obstaculo){
+			Off(OUT_AC);
+			if(SensorUS(IN_2) == preto){
+				OnRev(OUT_AC);
+				Wait(400);
+				x = 1
+				return x;
+				}
+			if(SensorUS(IN_2) == branco){
+				resgate();
+				//definir valor da cor branca
+				//função resgate
+
+			}	
+			
+		}
+	}
+}
+sub Contornar(){
+	while(true){
+		OnFwd(OUT_A, 60);
+        OnRev(OUT_C, 60);
+        Wait(850);
+        OnFwd(OUT_AC, 60);
+        Wait (1500);
+        // Giro
+        // Reta
+        // Giro
+        // Reta
+        // Ler a lina, novo posicionamento
+        // fim
+	}
+}
+
+sub Resgate(){}
+
+task main(){
+	while(true){
+   		SetSensorLowspeed(IN_4); //Ultrassom
+   		SetSensorLowspeed(IN_3); //Esquerda C
+   		SetSensorLowspeed(IN_2); //Frente
+   		SetSensorLowspeed(IN_1); //Direita A
+
+   		Segue_Linha();
+   		if(SensorUS(IN_4) == 10){
+   			Obstaculos(x);
+	   	}
+   		if (x = 1){
+   			Contorno();
+   		}
+   	}
+
+}
