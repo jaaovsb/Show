@@ -1,0 +1,86 @@
+//sensores
+#define ULTRASSOM SensorUS(IN_4)
+#define COR_ESQUERDA SensorUS(IN_3)
+#define COR_FRENTE SensorUS(IN_2)
+#define COR_DIREITA SensorUS(IN_1)
+
+//cores
+#define PRETO 12
+#define BRANCO 17
+#define VERMELHO 0
+
+//velocidades
+#define VEL_NORMAL 60
+#define VEL_REDUZ 50
+#define VEL_CURVA 70
+
+//Ultrassom
+#define DIST 10
+
+//Obstáculos
+#define VOLTA 700
+#define LADO 1000
+#define FRENTE 1500
+#define ALINHAR 350
+
+sub Obstaculos(){
+	OnFwd(OUT_A, VEL_NORMAL);
+	OnRev(OUT_C, VEL_NORMAL);
+	Wait(VOLTA);
+	OnFwd(OUT_AC, VEL_NORMAL);
+	Wait(LADO);
+	OnFwd(OUT_C, VEL_NORMAL);
+	OnRev(OUT_A, VEL_NORMAL);
+	Wait(VOLTA);
+	OnFwd(OUT_AC, VEL_NORMAL);
+	Wait(FRENTE);
+	OnFwd(OUT_C, VEL_NORMAL);
+	OnRev(OUT_A, VEL_NORMAL);
+	Wait(VOLTA);
+	if(ULTRASSOM <= DIST){
+		OnFwd(OUT_A, VEL_NORMAL);
+		OnRev(OUT_C, VEL_NORMAL);
+		Wait(VOLTA);
+	}
+	while(COR_ESQUERDA != PRETO){
+		OnFwd(OUT_A, VEL_NORMAL);
+		OnFwd(OUT_C, VEL_NORMAL);
+		if(COR_ESQUERDA == PRETO){
+			Off(OUT_AC);
+			OnFwd(OUT_A, VEL_REDUZ);
+			Wait(ALINHAR);
+			break;
+		}
+	}
+}
+
+sub Segue_Linha(){
+	while(true){
+		OnFwd(OUT_AC, VEL_NORMAL);
+		if(ULTRASSOM <= DIST){
+   			Obstaculos();
+   		}
+		while(COR_DIREITA <= PRETO){
+			OnRev(OUT_A, VEL_CURVA);
+			OnFwd(OUT_C, VEL_CURVA);
+   			if(ULTRASSOM <= DIST){
+   				Obstaculos();
+   			}
+   		}
+   		while(COR_ESQUERDA <= PRETO){
+			OnRev(OUT_C, VEL_CURVA);
+			OnFwd(OUT_A, VEL_CURVA);
+        	if(ULTRASSOM <= DIST){
+   				Obstaculos();
+   			}
+   		}
+   	}
+}
+task main(){
+	SetSensorLowspeed(IN_3); //Esquerda C
+   	SetSensorLowspeed(IN_2); //Meio
+   	SetSensorLowspeed(IN_1); //Direita A
+   	SetSensorLowspeed(IN_4); //Ultrassom
+
+   	Segue_Linha();
+}
