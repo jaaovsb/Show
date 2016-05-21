@@ -1,0 +1,146 @@
+///SENSORES
+#define ULTRASSOM SensorUS(IN_4)
+#define COR_ESQUERDA (IN_3)
+#define COR_FRENTE SensorUS(IN_2)
+#define COR_DIREITA (IN_1)
+
+//CORES
+#define VERMELHO 5
+#define PRETO 1
+
+
+//VELOCIDADES
+#define VEL_CURVA 85
+#define VEL_NORMAL 70
+#define VEL_REDUZIDA 40
+#define VEL_GARRA 80
+#define VEL_GIRO 80
+
+//waits
+#define RETA 2000
+#define RETA_MENOR 1000
+#define CURVA 600
+#define CURVA_MAIOR 700
+#define GIRO 1300
+#define ABRE 200
+#define FECHA 150
+
+//ULTRASSOM
+#define DIST 15
+#define NOVA_DIST 21
+
+int x = 0;
+
+sub desvia(){
+	OnRev(OUT_C, VEL_CURVA);
+	OnFwd(OUT_A, VEL_CURVA);
+	Wait(CURVA);
+	OnFwd(OUT_AC, VEL_NORMAL);
+	Wait(RETA);
+	OnRev(OUT_A, VEL_NORMAL);
+	OnFwd(OUT_C, VEL_NORMAL);
+	Wait(CURVA_MAIOR);
+	OnFwd(OUT_AC, VEL_NORMAL);
+	Wait(RETA);
+	OnRev(OUT_A, VEL_CURVA);
+	OnFwd(OUT_C, VEL_CURVA);
+	Wait(CURVA);
+	OnFwd(OUT_AC, VEL_NORMAL);
+	while(Sensor(COR_ESQUERDA) == PRETO){
+		OnFwd(OUT_AC, VEL_NORMAL);
+	}
+	Off(OUT_AC);
+	if(Sensor(COR_ESQUERDA) == PRETO){
+		while(Sensor(COR_ESQUERDA) == PRETO){
+			OnFwd(OUT_A, VEL_NORMAL);
+		}
+	}
+}
+
+int anda(){
+	OnFwd(OUT_AC, VEL_NORMAL);
+	if(ULTRASSOM <= DIST){
+		desvia();
+	}
+	if(Sensor(COR_ESQUERDA) == VERMELHO){
+		Off(OUT_AC);
+		return 1;
+	}
+	if(Sensor(COR_ESQUERDA) == PRETO){
+		while(Sensor(COR_ESQUERDA)== PRETO){
+			OnFwd(OUT_A, VEL_CURVA);
+			OnRev(OUT_C, VEL_CURVA);
+			Wait(100);
+			if(ULTRASSOM <= DIST){
+				desvia();
+			}
+			if(Sensor(COR_ESQUERDA) == VERMELHO){
+				Off(OUT_AC);
+				return 1;
+			}
+		}
+		if(Sensor(COR_DIREITA) == PRETO){
+			while(Sensor(COR_DIREITA) == PRETO){
+				OnFwd(OUT_C, VEL_CURVA);
+				OnRev(OUT_A, VEL_CURVA);
+				Wait(100);
+				if(ULTRASSOM <= DIST){
+					desvia();
+				}
+				if(Sensor(COR_ESQUERDA) == VERMELHO){
+					Off(OUT_AC);
+					return 1;
+				}
+			}
+		}
+		if(Sensor(COR_ESQUERDA) == VERMELHO){
+			Off(OUT_AC);
+			return 1;
+		}
+	}
+}
+
+sub resgate(){
+	if((Sensor(COR_ESQUERDA) == VERMELHO) && (Sensor(COR_DIREITA) != VERMELHO)){
+		while(Sensor(COR_DIREITA) != VERMELHO){
+			OnFwd(OUT_A, VEL_REDUZIDA);
+		}
+	}
+	if(ULTRASSOM <= DIST){
+		OnRev(OUT_AC, 600);
+		until(ULTRASSOM == NOVA_DIST);
+	}
+	if(COR_FRENTE == 0){
+		OnFwd(OUT_B, VEL_GARRA);
+		Wait(ABRE);
+		Off(OUT_B);
+		OnFwd(OUT_C, VEL_GIRO);
+		Wait(GIRO);
+		OnRev(OUT_A, VEL_GIRO);
+		Wait(GIRO);
+		OnRev(OUT_B, VEL_GARRA);
+		Wait(FECHA);
+		OnFwd(OUT_AC, VEL_NORMAL);
+	}
+	else{
+		OnFwd(OUT_C, VEL_GIRO);
+		Wait(GIRO);
+		OnRev(OUT_A, VEL_GIRO);
+		Wait(GIRO);
+		OnFwd(OUT_AC, RETA);
+	}
+}
+
+task main(){
+	SetSensorLowspeed(IN_4); //Ultrassom
+	SetSensorColorFull(COR_ESQUERDA); //Esquerda C
+	SetSensorLowspeed(IN_2); //Meio
+ 	SetSensorColorFull(COR_DIREITA); //Direita A
+
+	while(x = 0){
+		x = anda();
+    }
+    if (x= 1){
+    	resgate();
+    }
+}
