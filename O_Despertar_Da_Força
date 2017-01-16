@@ -8,7 +8,6 @@
 #define VERMELHO 5
 #define PRETO 1
 
-
 //VELOCIDADES
 #define VEL_CURVA 85
 #define VEL_NORMAL 70
